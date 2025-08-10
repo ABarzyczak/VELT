@@ -1,0 +1,105 @@
+#include "rowOperations.h"
+#include "../include/editor_config.h"
+#include "../include/constants.h"
+#include "../include/terminal.h"
+#include <cstdlib>
+#include <cstring>
+
+void rowUpdate(editorRow *row) {
+    int tabs = 0;
+
+    for (int i = 0; i < row->size; i++)
+        if (row->chars[i] == TAB) tabs++;
+
+    char* newRender = static_cast<char*>(realloc(row->render, row->size + tabs * (TAB_SIZE - TAB_REPLACEMENT_OFFSET) + SPACE_FOR_NULL_BYTE));
+
+    if (!newRender) {
+        free(row->render);
+        row->render = NULL;
+        die("rowUpdate realloc failed");
+        return;
+    }
+    row->render = newRender;
+
+    int idx = 0;
+    for (int i = 0; i < row->size; i++)
+    {
+        if (row->chars[i] == TAB) {
+            row->render[idx++] = ' ';
+            while (idx % TAB_SIZE != 0) row->render[idx++] = ' ';
+        }
+        else
+            row->render[idx++] = row->chars[i];
+    }
+    row->render[idx] = '\0';
+    row->renderSize = idx;
+}
+
+// void rowInsertChar(editorRow *row, int at, int c) {
+//     if (at < 0 || at > row->size) return;
+//     row->chars = static_cast<char*>(realloc(row->chars, row->size + NEW_CHAR_AND_NULL_BYTE));
+//     if (!row->chars) {
+//         die("rowInsertChar realloc failed");
+//         return;
+//     }
+//     memmove(&row->chars[at + 1], &row->chars[at], row->size - at + 1);
+
+//     row->chars[at] = c;
+//     row->size++;
+
+//     rowUpdate(row);
+//     E.dirty++;
+// }
+
+void rowAppend(std::string s, size_t len) {
+    E.row = static_cast<editorRow*>(realloc(E.row, sizeof(editorRow) * (E.fileRows + ONE)));
+    if (!E.row) {
+        die("rowAppend realloc failed");
+        return;
+    }
+    
+    int currentRow = E.fileRows;
+    
+    E.row[currentRow].size = len;
+    E.row[currentRow].renderSize = 0;
+    E.row[currentRow].chars = static_cast<char*>(malloc(len + SPACE_FOR_NULL_BYTE));
+    E.row[currentRow].render = nullptr;
+    
+    if (!E.row[currentRow].chars) {
+        die("rowAppend malloc failed");
+        return;
+    }
+    
+    memcpy(E.row[currentRow].chars, s.c_str(), len);
+    E.row[currentRow].chars[len] = NULL_TERMINATOR;
+
+    rowUpdate(&E.row[currentRow]);
+    E.fileRows++;
+
+    E.dirty++;
+}
+
+char *rowsToString(size_t *bufLength) {     //When using this function, make sure to free the returned buffer
+    size_t totalSize = 0;
+    for (int i = 0; i < E.fileRows; i++)
+        totalSize += E.row[i].size + strlen(NEWLINE);
+    
+    if (bufLength) *bufLength = totalSize;
+
+    char *buffer = static_cast<char*>(malloc(totalSize));
+    if (!buffer) {
+        die("rowsToString malloc failed");
+        return NULL;
+    }
+    char *ptr = buffer;     // Moving pointer to track current position in buffer
+
+    for (int i = 0; i < E.fileRows; i++) {
+        memcpy(ptr, E.row[i].chars, E.row[i].size);
+        ptr += E.row[i].size;
+
+        memcpy(ptr, NEWLINE, strlen(NEWLINE));
+        ptr += strlen(NEWLINE);
+    }
+    
+    return buffer;
+}
