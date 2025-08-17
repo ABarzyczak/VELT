@@ -13,6 +13,11 @@ typedef struct{
     char *render;
 }editorRow;
 
+enum editorMode {
+	DEFAULT_MODE,
+	INSERT_MODE
+};
+
 struct editorConfig {
     int cursorX, cursorY;           // cursor position in the file
     int renderX;                    // visual position of cursor in the row
@@ -24,6 +29,7 @@ struct editorConfig {
     int dirty;                      // file modified flag
     time_t statusMessageTime;
     editorRow *row;
+    editorMode mode;
 };
 
 extern editorConfig E;

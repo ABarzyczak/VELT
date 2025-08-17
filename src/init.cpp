@@ -6,6 +6,7 @@
 
 void initEditor() {
     E.statusMessage[0] = '\0';
+    E.mode = DEFAULT_MODE;
 
     if (getWindowSize(&E.screenRows, &E.screenCols) == ERR) die("getWindowSize");
     E.screenRows -= STATUS_BAR_AND_PROMPT_SPACE;

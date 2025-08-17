@@ -10,15 +10,17 @@
 #include <cstring>
 
 enum editorKey {
+    ESC = 27,
     BACKSPACE = 127,
-    ARROW_LEFT = 1000,  // It's set to 1000 to avoid conflict with ASCII characters
+    ARROW_LEFT = 1000,  // It's set to high number to avoid conflict with ASCII characters
     ARROW_RIGHT,
     ARROW_UP,
     ARROW_DOWN,
     SCREEN_BOTTOM,
     SCREEN_TOP,
     SCREEN_MIDDLE,
-    DELETE_KEY
+    DELETE_KEY,
+    INSERTION
 };
 
 int readKey() {
@@ -46,79 +48,25 @@ int readKey() {
                 case VK_DELETE: return DELETE_KEY;
                 case VK_BACK: return BACKSPACE;
 
-                // default:
-                //     switch (asciiChar) {     later I'll implement this when i get to insert mode
-                //         case 'h': return ARROW_LEFT;
-                //         case 'j': return ARROW_DOWN;
-                //         case 'k': return ARROW_UP;
-                //         case 'l': return ARROW_RIGHT;
-                //         case 'H': return SCREEN_BOTTOM;
-                //         case 'M': return SCREEN_MIDDLE;
-                //         case 'L': return SCREEN_TOP;
-                        default:
-                            if (asciiChar != 0) return asciiChar;
-                    // }
+                default:
+                    if(E.mode == DEFAULT_MODE && asciiChar >= 32 && asciiChar <= 126) {
+                        switch (asciiChar) {
+                            case 'h': return ARROW_LEFT;
+                            case 'j': return ARROW_DOWN;
+                            case 'k': return ARROW_UP;
+                            case 'l': return ARROW_RIGHT;
+                            case 'H': return SCREEN_BOTTOM;
+                            case 'M': return SCREEN_MIDDLE;
+                            case 'L': return SCREEN_TOP;
+                            case 'i': return INSERTION;
+                            default:
+                                if (asciiChar != 0) return asciiChar;
+                        }
+                    }
+                if (asciiChar != 0) return asciiChar;
             }
         }
     }
-}
-
-void processKeypress() {
-    static int quitTimes = QUIT_TIMES;
-    int c = readKey();
-    switch (c) {
-        case CTRL_KEY('q'):
-        {
-            if (E.dirty && quitTimes > 0) {
-                setStatusMessage("WARNING!!! File has unsaved changes. Press Ctrl-Q again to quit.");
-                quitTimes--;
-                return;
-            }
-            DWORD written;
-            const char* output = "\x1b[2J\x1b[H";
-            if (!WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), output, (DWORD)strlen(output), &written, NULL)) 
-                die("editorRefreshScreen_WriteConsoleA");
-            exit(EXIT_SUCCESS);
-            break;
-        }
-
-        case ARROW_DOWN:
-        case ARROW_LEFT:
-        case ARROW_RIGHT:
-        case ARROW_UP:
-            moveCursor(c);
-            break;
-        case SCREEN_BOTTOM:
-        case SCREEN_TOP:
-        {
-            int pageSize = E.screenRows;
-            while(pageSize--)
-                moveCursor(c == SCREEN_BOTTOM ? ARROW_UP : ARROW_DOWN);
-            break;
-        }
-        case SCREEN_MIDDLE:
-        {
-            int middle = E.screenRows / MIDDLE_SCREEN_DIVISOR;
-            while(middle--)
-                moveCursor(ARROW_DOWN);
-            break;
-        }
-        case BACKSPACE:
-        case DELETE_KEY:
-        case CTRL_KEY('h'):
-            if (c == DELETE_KEY) moveCursor(ARROW_RIGHT);
-                deleteChar();
-            break;
-        case CTRL_KEY('s'):
-                editorSave();
-            break;
-
-        default:
-            insertChar(c);
-            break;
-    }
-
-    quitTimes = QUIT_TIMES;
 }
 
 void moveCursor(int key) {
@@ -209,4 +157,118 @@ void deleteChar()
         E.dirty++;
         E.cursorX--;
     }
+}
+
+void defaultMode()
+{
+    static int quitTimes = QUIT_TIMES;
+    int c = readKey();
+    switch (c) {
+            case CTRL_KEY('q'):
+            {
+                if (E.dirty && quitTimes > 0) {
+                    setStatusMessage("WARNING!!! File has unsaved changes. Press Ctrl-Q again to quit.");
+                    quitTimes--;
+                    return;
+                }
+                DWORD written;
+                const char* output = "\x1b[2J\x1b[H";
+                if (!WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), output, (DWORD)strlen(output), &written, NULL)) 
+                    die("editorRefreshScreen_WriteConsoleA");
+                exit(EXIT_SUCCESS);
+                break;
+            }
+            case ARROW_DOWN:
+            case ARROW_LEFT:
+            case ARROW_RIGHT:
+            case ARROW_UP:
+                moveCursor(c);
+                break;
+            case SCREEN_BOTTOM:
+            case SCREEN_TOP:
+            {
+                int pageSize = E.screenRows;
+                while(pageSize--)
+                    moveCursor(c == SCREEN_BOTTOM ? ARROW_UP : ARROW_DOWN);
+                break;
+            }
+            case SCREEN_MIDDLE:
+            {
+                int middle = E.screenRows / MIDDLE_SCREEN_DIVISOR;
+                while(middle--)
+                    moveCursor(ARROW_DOWN);
+                break;
+            }
+            case INSERTION:
+                E.mode = INSERT_MODE;
+                setStatusMessage("-- INSERT --");
+                break;
+            case CTRL_KEY('s'):
+                editorSave();
+                break;
+        }
+        
+    quitTimes = QUIT_TIMES;
+}
+
+void insertMode()
+{
+    static int quitTimes = QUIT_TIMES;
+    int c = readKey();
+    switch (c) {
+            case CTRL_KEY('q'):
+            {
+                if (E.dirty && quitTimes > 0) {
+                    setStatusMessage("WARNING!!! File has unsaved changes. Press Ctrl-Q again to quit.");
+                    quitTimes--;
+                    return;
+                }
+                DWORD written;
+                const char* output = "\x1b[2J\x1b[H";
+                if (!WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), output, (DWORD)strlen(output), &written, NULL)) 
+                    die("editorRefreshScreen_WriteConsoleA");
+                exit(EXIT_SUCCESS);
+                break;
+            }
+            case ARROW_DOWN:
+            case ARROW_LEFT:
+            case ARROW_RIGHT:
+            case ARROW_UP:
+                moveCursor(c);
+                break;
+            case SCREEN_BOTTOM:
+            case SCREEN_TOP:
+            {
+                int pageSize = E.screenRows;
+                while(pageSize--)
+                    moveCursor(c == SCREEN_BOTTOM ? ARROW_UP : ARROW_DOWN);
+                break;
+            }
+            case SCREEN_MIDDLE:
+            {
+                int middle = E.screenRows / MIDDLE_SCREEN_DIVISOR;
+                while(middle--)
+                    moveCursor(ARROW_DOWN);
+                break;
+            }
+            case CTRL_KEY('s'):
+                editorSave();
+                break;
+            case ESC:
+                E.mode = DEFAULT_MODE;
+                setStatusMessage("");
+                break;
+            case BACKSPACE:
+            case DELETE_KEY:
+            case CTRL_KEY('h'):
+                if (c == DELETE_KEY) moveCursor(ARROW_RIGHT);
+                deleteChar();
+                break;
+            default:
+                if (c >= MIN_ASCII_PRINTABLE_CHAR && c <= MAX_ASCII_PRINTABLE_CHAR)
+                    insertChar(c);
+                break;
+        }
+        
+    quitTimes = QUIT_TIMES;
 }

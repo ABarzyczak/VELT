@@ -17,7 +17,10 @@ int main(int argc, char* argv[]) {
 
     while (true) {
         refreshScreen();
-        processKeypress();
+        if (E.mode == DEFAULT_MODE) 
+            defaultMode();
+        else if (E.mode == INSERT_MODE) 
+            insertMode();
     }
 
     return EXIT_SUCCESS;
