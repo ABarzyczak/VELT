@@ -4,6 +4,8 @@ A lightweight terminal-based text editor built in C++ for Windows and Linux, fea
 
 ## Features
 
+
+- **Modal editing**: Vim-like modes (DEFAULT and INSERT) for navigation and text entry
 - **Cross-platform**: Runs on Windows and Linux terminals
 - **File loading and saving**: Open and edit text files, save with `Ctrl+S`
 - **Status bar**: Shows file name, line count, and modification state
@@ -23,12 +25,12 @@ A lightweight terminal-based text editor built in C++ for Windows and Linux, fea
      
 ### Run
 
-// To start the editor and open a file (or create if it doesn't exist):
+To start the editor and open a file (or create if it doesn't exist):
 ```
 make run
 ```
 **Note:** Currently, the filename is hardcoded as `file.txt` in the Makefile's `run` command. To open a different file, you must edit the Makefile and change the argument in the `run` target. This is a temporary limitation and will be improved in the future.
-// If no filename is given, the editor opens an empty buffer.
+If no filename is given, the editor opens an empty buffer.
 
 ### Keybindings
 
@@ -36,6 +38,17 @@ make run
 - **Page Up/Down**: Move by pages
 - **Ctrl+S**: Save changes
 - **Ctrl+Q**: Quit (prompts if unsaved changes)
+- **i**: Enter insert mode
+- **ESC**: Return to default mode
+
+#### Vim-like keybindings (in DEFAULT mode)
+- **h**: Move cursor left
+- **j**: Move cursor down
+- **k**: Move cursor up
+- **l**: Move cursor right
+- **H**: Move to top of screen
+- **M**: Move to middle of screen
+- **L**: Move to bottom of screen
 
 ## Contributing
 
