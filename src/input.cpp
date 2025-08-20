@@ -5,30 +5,31 @@
 #include "../include/constants.h"
 #include "../include/rowOperations.h"
 #include "../include/file_io.h"
+#include "../include/modes.h"
 #include <windows.h>
 #include <cstdlib>
 #include <cstring>
 
-enum editorKey {
-    ESC = 27,
-    BACKSPACE = 127,
-    ARROW_LEFT = 1000,  // It's set to high number to avoid conflict with ASCII characters
-    ARROW_RIGHT,
-    ARROW_UP,
-    ARROW_DOWN,
-    SCREEN_BOTTOM,
-    SCREEN_TOP,
-    SCREEN_MIDDLE,
-    DELETE_KEY,
-    INSERTION
-};
+// enum editorKey {
+//     ESC = 27,
+//     BACKSPACE = 127,
+//     ARROW_LEFT = 1000,  // It's set to high number to avoid conflict with ASCII characters
+//     ARROW_RIGHT,
+//     ARROW_UP,
+//     ARROW_DOWN,
+//     SCREEN_BOTTOM,
+//     SCREEN_TOP,
+//     SCREEN_MIDDLE,
+//     DELETE_KEY,
+//     INSERTION
+// };
 
 int readKey() {
     INPUT_RECORD inputRecord;   // Structure that contain various types of console events 
     DWORD read;
     
     while (true) {
-        if (!ReadConsoleInput(GetStdHandle(STD_INPUT_HANDLE), &inputRecord, ONE, &read))    // Only keyboard events
+        if (!ReadConsoleInput(GetStdHandle(STD_INPUT_HANDLE), &inputRecord, 1, &read))    // Only keyboard events
             die("ReadConsoleInput failed");
         
         if (inputRecord.EventType == KEY_EVENT && inputRecord.Event.KeyEvent.bKeyDown) {
@@ -49,7 +50,7 @@ int readKey() {
                 case VK_BACK: return BACKSPACE;
 
                 default:
-                    if(E.mode == DEFAULT_MODE && asciiChar >= 32 && asciiChar <= 126) {
+                    if(E.mode == DEFAULT_MODE && asciiChar >= MIN_ASCII_PRINTABLE_CHAR && asciiChar <= MAX_ASCII_PRINTABLE_CHAR) {
                         switch (asciiChar) {
                             case 'h': return ARROW_LEFT;
                             case 'j': return ARROW_DOWN;
@@ -67,6 +68,14 @@ int readKey() {
             }
         }
     }
+}
+
+void processKeypress()
+{
+    if (E.mode == DEFAULT_MODE) 
+        defaultMode();
+    else if (E.mode == INSERT_MODE) 
+        insertMode();
 }
 
 void moveCursor(int key) {
@@ -97,7 +106,7 @@ void moveCursor(int key) {
             break;
         
         case ARROW_DOWN:
-            if( E.cursorY < E.fileRows - ONE) 
+            if( E.cursorY < E.fileRows - 1) 
                 E.cursorY++;
             break;
     }
@@ -112,7 +121,7 @@ int cursorX_To_renderX(editorRow *row, int cX) {
     int rX = 0;
     for (int i = 0; i < cX; i++) {
         if (row->chars[i] == '\t')
-            rX += (TAB_SIZE - ONE) - (rX % TAB_SIZE);
+            rX += (TAB_SIZE - 1) - (rX % TAB_SIZE);
         rX++;
     }
     return rX;
@@ -157,118 +166,4 @@ void deleteChar()
         E.dirty++;
         E.cursorX--;
     }
-}
-
-void defaultMode()
-{
-    static int quitTimes = QUIT_TIMES;
-    int c = readKey();
-    switch (c) {
-            case CTRL_KEY('q'):
-            {
-                if (E.dirty && quitTimes > 0) {
-                    setStatusMessage("WARNING!!! File has unsaved changes. Press Ctrl-Q again to quit.");
-                    quitTimes--;
-                    return;
-                }
-                DWORD written;
-                const char* output = "\x1b[2J\x1b[H";
-                if (!WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), output, (DWORD)strlen(output), &written, NULL)) 
-                    die("editorRefreshScreen_WriteConsoleA");
-                exit(EXIT_SUCCESS);
-                break;
-            }
-            case ARROW_DOWN:
-            case ARROW_LEFT:
-            case ARROW_RIGHT:
-            case ARROW_UP:
-                moveCursor(c);
-                break;
-            case SCREEN_BOTTOM:
-            case SCREEN_TOP:
-            {
-                int pageSize = E.screenRows;
-                while(pageSize--)
-                    moveCursor(c == SCREEN_BOTTOM ? ARROW_UP : ARROW_DOWN);
-                break;
-            }
-            case SCREEN_MIDDLE:
-            {
-                int middle = E.screenRows / MIDDLE_SCREEN_DIVISOR;
-                while(middle--)
-                    moveCursor(ARROW_DOWN);
-                break;
-            }
-            case INSERTION:
-                E.mode = INSERT_MODE;
-                setStatusMessage("-- INSERT --");
-                break;
-            case CTRL_KEY('s'):
-                editorSave();
-                break;
-        }
-        
-    quitTimes = QUIT_TIMES;
-}
-
-void insertMode()
-{
-    static int quitTimes = QUIT_TIMES;
-    int c = readKey();
-    switch (c) {
-            case CTRL_KEY('q'):
-            {
-                if (E.dirty && quitTimes > 0) {
-                    setStatusMessage("WARNING!!! File has unsaved changes. Press Ctrl-Q again to quit.");
-                    quitTimes--;
-                    return;
-                }
-                DWORD written;
-                const char* output = "\x1b[2J\x1b[H";
-                if (!WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), output, (DWORD)strlen(output), &written, NULL)) 
-                    die("editorRefreshScreen_WriteConsoleA");
-                exit(EXIT_SUCCESS);
-                break;
-            }
-            case ARROW_DOWN:
-            case ARROW_LEFT:
-            case ARROW_RIGHT:
-            case ARROW_UP:
-                moveCursor(c);
-                break;
-            case SCREEN_BOTTOM:
-            case SCREEN_TOP:
-            {
-                int pageSize = E.screenRows;
-                while(pageSize--)
-                    moveCursor(c == SCREEN_BOTTOM ? ARROW_UP : ARROW_DOWN);
-                break;
-            }
-            case SCREEN_MIDDLE:
-            {
-                int middle = E.screenRows / MIDDLE_SCREEN_DIVISOR;
-                while(middle--)
-                    moveCursor(ARROW_DOWN);
-                break;
-            }
-            case CTRL_KEY('s'):
-                editorSave();
-                break;
-            case ESC:
-                E.mode = DEFAULT_MODE;
-                setStatusMessage("");
-                break;
-            case BACKSPACE:
-            case DELETE_KEY:
-            case CTRL_KEY('h'):
-                if (c == DELETE_KEY) moveCursor(ARROW_RIGHT);
-                deleteChar();
-                break;
-            default:
-                if (c >= MIN_ASCII_PRINTABLE_CHAR && c <= MAX_ASCII_PRINTABLE_CHAR)
-                    insertChar(c);
-                break;
-        }
-        
-    quitTimes = QUIT_TIMES;
 }

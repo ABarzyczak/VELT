@@ -3,8 +3,7 @@
  * Set of definitions 
  **/
 #define ERR -1
-#define ONE 1
-#define VERSION "1.1"
+#define VERSION "1.2"
 
 #define CURSOR_LOCATION "\x1b[%d;%dH"
 #define HIDE_CURSOR "\x1b[?25l"

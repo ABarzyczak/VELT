@@ -14,13 +14,10 @@ int main(int argc, char* argv[]) {
     }
 
     setStatusMessage("HELP: Ctrl-S = save | HELP: Ctrl-Q = quit");
-
+    
     while (true) {
         refreshScreen();
-        if (E.mode == DEFAULT_MODE) 
-            defaultMode();
-        else if (E.mode == INSERT_MODE) 
-            insertMode();
+        processKeypress();
     }
 
     return EXIT_SUCCESS;

@@ -22,7 +22,7 @@ void refreshScreen() {
     drawMessageBar(&ab);
 
     char buf[CURSOR_BUFFER_SIZE];
-    snprintf(buf, sizeof(buf), CURSOR_LOCATION, (E.cursorY - E.rowOffset) + ONE, (E.renderX - E.colOffset) + ONE);
+    snprintf(buf, sizeof(buf), CURSOR_LOCATION, (E.cursorY - E.rowOffset) + 1, (E.renderX - E.colOffset) + 1);
     abAppend(&ab, buf, static_cast<DWORD>(strlen(buf)));
 
     abAppend(&ab, SHOW_CURSOR, static_cast<DWORD>(strlen(SHOW_CURSOR)));
@@ -54,7 +54,7 @@ void drawRows(appendBuffer* ab) {
                 }
 
                 while (padding-- > 0)
-                    abAppend(ab, " ", ONE);
+                    abAppend(ab, " ", 1);
 
                 abAppend(ab, welcome, static_cast<DWORD>(strlen(welcome)));
             } else 
@@ -87,7 +87,7 @@ void drawStatusBar(appendBuffer *ab)
 
     abAppend(ab, status, statusLen);
 
-    int rowStatusLen = snprintf(rowStatus, sizeof(rowStatus), "%d/%d", E.cursorY + ONE, E.fileRows);
+    int rowStatusLen = snprintf(rowStatus, sizeof(rowStatus), "%d/%d", E.cursorY + 1, E.fileRows);
 
     while(statusLen < E.screenCols)
     {
@@ -131,25 +131,25 @@ void editorScroll() {
         E.cursorY = 0;
 
     if (E.cursorY >= E.fileRows && E.fileRows > 0)                      // Set cursorY to the last row if it exceeds fileRows
-        E.cursorY = E.fileRows - ONE;
+        E.cursorY = E.fileRows - 1;
 
     if( E.renderX < E.colOffset )                                       // Handle horizontal scrolling
         E.colOffset = E.renderX;
 
     if (E.renderX >= E.colOffset + E.screenCols)                        // Scroll right if cursor moves right of visible area
-        E.colOffset = E.renderX - E.screenCols + ONE;                   
+        E.colOffset = E.renderX - E.screenCols + 1;                   
 
     if (E.cursorX < E.colOffset)                                        // Scroll left if cursor moves left of visible area
         E.colOffset = E.cursorX;
 
     if (E.cursorX >= E.colOffset + E.screenCols)                        // Scroll right if cursor moves right of visible area
-        E.colOffset = E.cursorX - E.screenCols + ONE;
+        E.colOffset = E.cursorX - E.screenCols + 1;
 
     if (E.colOffset < 0)                                                // Ensure colOffset doesn't go negative
         E.colOffset = 0;
 
     if (E.cursorY >= E.rowOffset + E.screenRows)                        // Scroll down if cursor moves down of visible area
-        E.rowOffset = E.cursorY - E.screenRows + ONE;
+        E.rowOffset = E.cursorY - E.screenRows + 1;
 
     if (E.rowOffset < 0)                                                // Ensure rowOffset doesn't go negative
         E.rowOffset = 0;

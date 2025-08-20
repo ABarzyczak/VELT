@@ -52,7 +52,7 @@ void rowUpdate(editorRow *row) {
 // }
 
 void rowAppend(std::string s, size_t len) {
-    E.row = static_cast<editorRow*>(realloc(E.row, sizeof(editorRow) * (E.fileRows + ONE)));
+    E.row = static_cast<editorRow*>(realloc(E.row, sizeof(editorRow) * (E.fileRows + 1)));
     if (!E.row) {
         die("rowAppend realloc failed");
         return;
