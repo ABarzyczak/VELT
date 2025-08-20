@@ -7,7 +7,7 @@ INCDIR = include
 OBJDIR = obj
 BINDIR = bin
 
-TARGET = $(BINDIR)/VELT
+TARGET = $(BINDIR)/velt
 
 SOURCES = $(wildcard $(SRCDIR)/*.cpp)
 OBJECTS = $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,$(SOURCES))
@@ -32,7 +32,6 @@ clean:
 	$(RM) -rf $(OBJDIR) $(BINDIR)
 
 run: $(TARGET)
-	$(TARGET) file.txt
 
 help:
 	@echo Available targets:

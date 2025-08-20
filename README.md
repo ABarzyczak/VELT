@@ -4,7 +4,6 @@ A lightweight terminal-based text editor built in C++ for Windows and Linux, fea
 
 ## Features
 
-
 - **Modal editing**: Vim-like modes (DEFAULT and INSERT) for navigation and text entry
 - **Cross-platform**: Runs on Windows and Linux terminals
 - **File loading and saving**: Open and edit text files, save with `Ctrl+S`
@@ -15,6 +14,26 @@ A lightweight terminal-based text editor built in C++ for Windows and Linux, fea
 
 ## Usage
 
+## Making VELT available globally
+
+### Bash (Linux, WSL, Git Bash)
+You can automate adding the `VELT/bin` directory to your PATH by running the provided Bash script:
+
+```bash
+bash add_bash.sh
+```
+This will append the correct path to your `~/.bashrc` file, making `velt` available in Bash terminals.
+
+### Windows Command Prompt (cmd)
+To use `velt` in Windows Command Prompt or PowerShell, you must manually add the `bin` folder to your user environment variables:
+
+1. Open the Start menu and search for "Environment Variables".
+2. Click "Edit the system environment variables".
+3. In the System Properties window, click "Environment Variables".
+4. Under "User variables", select `PATH` and click "Edit".
+5. Click "New" and add `C:\Users\olekb\projects\VELT\bin`.
+6. Click "OK" to save.
+
 ### Build
 
 1. Ensure you have a C++17 compiler (e.g., g++ on Linux, MinGW on Windows)
@@ -22,15 +41,30 @@ A lightweight terminal-based text editor built in C++ for Windows and Linux, fea
 	 ```
 	 make
 	 ```
-     
+
 ### Run
 
-To start the editor and open a file (or create if it doesn't exist):
+After building, you can start VELT from the terminal:
+
+**Bash (Linux, WSL, Git Bash):**
+```bash
+velt [filename]
 ```
-make run
+If you added `VELT/bin` to your PATH, you can run `velt` from any directory. Otherwise, run it from the `bin` folder:
+```bash
+./bin/velt [filename]
 ```
-**Note:** Currently, the filename is hardcoded as `file.txt` in the Makefile's `run` command. To open a different file, you must edit the Makefile and change the argument in the `run` target. This is a temporary limitation and will be improved in the future.
-If no filename is given, the editor opens an empty buffer.
+
+**Windows Command Prompt or PowerShell:**
+```
+velt [filename]
+```
+If you added `VELT/bin` to your PATH, you can run `velt.exe` from any directory. Otherwise, run it from the `bin` folder:
+```
+bin\velt [filename]
+```
+
+Replace `[filename]` with the file you want to edit.
 
 ### Keybindings
 
