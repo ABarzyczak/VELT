@@ -17,9 +17,9 @@ void editorOpen(char *filename) {
     
     E.fileName = strdup(filename);
 
-    std::ifstream file(filename); 
-    if (!file.is_open()) {
-        die("Could not open file");
+    std::fstream file(filename); 
+    if (!file.good()) {
+        file << "";
         return;
     }
 

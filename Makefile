@@ -31,7 +31,8 @@ $(BINDIR):
 clean:
 	$(RM) -rf $(OBJDIR) $(BINDIR)
 
-run: $(TARGET)
+run: $(TARGET) 
+	./$(TARGET) file.txt
 
 help:
 	@echo Available targets:

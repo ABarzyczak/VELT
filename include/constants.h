@@ -3,7 +3,6 @@
  * Set of definitions 
  **/
 #define ERR -1
-#define VERSION "1.2"
 
 #define CURSOR_LOCATION "\x1b[%d;%dH"
 #define HIDE_CURSOR "\x1b[?25l"
@@ -21,11 +20,7 @@
 
 #define ABUF_INIT {NULL, 0}
 
-#define WELCOME_BUFFER_SIZE 80
 #define CURSOR_BUFFER_SIZE 32
-
-#define WELCOME_ROW_DIVISOR 3
-#define WELCOME_PADDING 2
 
 #define TAB_SIZE 8
 #define TAB_REPLACEMENT_OFFSET 1

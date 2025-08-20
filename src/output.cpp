@@ -39,25 +39,6 @@ void drawRows(appendBuffer* ab) {
     for (int i = 0; i < E.screenRows; i++) {
         int rowIndex = i + E.rowOffset;
         if (rowIndex >= E.fileRows) {
-            if (E.fileRows == 0 && i == E.screenRows / WELCOME_ROW_DIVISOR) {
-                char welcome[WELCOME_BUFFER_SIZE];
-                int welcomeLen = snprintf(welcome, sizeof(welcome), 
-                                        "Welcome to VELT version %s", VERSION);
-                
-                if (welcomeLen > E.screenCols)
-                    welcome[E.screenCols] = '\0';
-
-                int padding = (E.screenCols - welcomeLen) / WELCOME_PADDING;
-                if (padding > 0) {
-                    abAppend(ab, TILDE, static_cast<DWORD>(strlen(TILDE)));
-                    padding--;
-                }
-
-                while (padding-- > 0)
-                    abAppend(ab, " ", 1);
-
-                abAppend(ab, welcome, static_cast<DWORD>(strlen(welcome)));
-            } else 
                 abAppend(ab, TILDE, static_cast<DWORD>(strlen(TILDE)));
         } else { 
             int len = E.row[rowIndex].renderSize - E.colOffset;
@@ -73,7 +54,6 @@ void drawRows(appendBuffer* ab) {
         abAppend(ab, ERASE_LINE, static_cast<DWORD>(strlen(ERASE_LINE)));
 
         abAppend(ab, NEWLINE, static_cast<DWORD>(strlen(NEWLINE)));
-        
     }
 }
 
