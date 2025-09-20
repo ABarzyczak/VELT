@@ -46,6 +46,10 @@ void editorOpen(char *filename) {
     E.fileRows = lineCount;
     file.close();
 
+    if (E.fileRows == 0) {
+        rowAppend("", 0);
+    }
+
     E.dirty = 0;
 }
 
@@ -79,6 +83,7 @@ void editorSave() {
     }
     file.close();
     
+    E.dirty = 0;
     free(buffer);
     setStatusMessage("%d bytes written to disk", bufLength);
 }

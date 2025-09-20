@@ -9,6 +9,7 @@
 #define SHOW_CURSOR "\x1b[?25h"
 #define RESET_CURSOR "\x1b[H"
 #define ERASE_LINE "\x1b[K"
+#define REFRESH "\x1b[2J\x1b[H"
 #define NEWLINE "\r\n"
 #define CTRL_KEY(k) ((k) & 0x1f)
 #define FONT_CHANGE_WHITE "\x1b[7m"

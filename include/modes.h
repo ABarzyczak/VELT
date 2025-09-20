@@ -5,3 +5,4 @@
  **/
 void defaultMode();
 void insertMode();
+void searchMode();

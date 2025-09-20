@@ -34,8 +34,18 @@ int readKey() {
         
         if (inputRecord.EventType == KEY_EVENT && inputRecord.Event.KeyEvent.bKeyDown) {
             WORD vkCode = inputRecord.Event.KeyEvent.wVirtualKeyCode;
+            DWORD ctrlState = inputRecord.Event.KeyEvent.dwControlKeyState;
             char asciiChar = inputRecord.Event.KeyEvent.uChar.AsciiChar;
-            
+
+            if (ctrlState & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED)) {
+                switch (vkCode) {
+                    case VK_LEFT: return CTRL_ARROW_LEFT;
+                    case VK_RIGHT: return CTRL_ARROW_RIGHT;
+                    // case 'c': return CTRL_KEY('c');
+                    // case 'v': return CTRL_KEY('v');
+                }
+            }
+
             switch (vkCode) {
                 // Cursor movement
                 case VK_UP: return ARROW_UP;
@@ -130,7 +140,7 @@ int cursorX_To_renderX(editorRow *row, int cX) {
 void insertChar(int c)
 {
     if(E.cursorY == E.fileRows)
-        rowAppend("", 0);
+        rowAppend(std::string(""), 0);
 
     editorRow *row = &E.row[E.cursorY];
     int at = E.cursorX;

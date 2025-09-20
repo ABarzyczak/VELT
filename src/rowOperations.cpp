@@ -35,22 +35,6 @@ void rowUpdate(editorRow *row) {
     row->renderSize = idx;
 }
 
-// void rowInsertChar(editorRow *row, int at, int c) {
-//     if (at < 0 || at > row->size) return;
-//     row->chars = static_cast<char*>(realloc(row->chars, row->size + NEW_CHAR_AND_NULL_BYTE));
-//     if (!row->chars) {
-//         die("rowInsertChar realloc failed");
-//         return;
-//     }
-//     memmove(&row->chars[at + 1], &row->chars[at], row->size - at + 1);
-
-//     row->chars[at] = c;
-//     row->size++;
-
-//     rowUpdate(row);
-//     E.dirty++;
-// }
-
 void rowAppend(std::string s, size_t len) {
     E.row = static_cast<editorRow*>(realloc(E.row, sizeof(editorRow) * (E.fileRows + 1)));
     if (!E.row) {
@@ -63,15 +47,21 @@ void rowAppend(std::string s, size_t len) {
     E.row[currentRow].size = len;
     E.row[currentRow].renderSize = 0;
     E.row[currentRow].chars = static_cast<char*>(malloc(len + SPACE_FOR_NULL_BYTE));
-    E.row[currentRow].render = nullptr;
-    
     if (!E.row[currentRow].chars) {
         die("rowAppend malloc failed");
         return;
     }
-    
-    memcpy(E.row[currentRow].chars, s.c_str(), len);
+    if (len > 0) 
+        memcpy(E.row[currentRow].chars, s.c_str(), len);
     E.row[currentRow].chars[len] = NULL_TERMINATOR;
+
+    E.row[currentRow].render = static_cast<char*>(malloc(SPACE_FOR_NULL_BYTE));
+    if (!E.row[currentRow].render) {
+        die("rowAppend render malloc failed");
+        return;
+    }
+    E.row[currentRow].render[0] = NULL_TERMINATOR;
+    E.row[currentRow].renderSize = 0;
 
     rowUpdate(&E.row[currentRow]);
     E.fileRows++;
@@ -81,9 +71,12 @@ void rowAppend(std::string s, size_t len) {
 
 char *rowsToString(size_t *bufLength) {     //When using this function, make sure to free the returned buffer
     size_t totalSize = 0;
-    for (int i = 0; i < E.fileRows; i++)
-        totalSize += E.row[i].size + strlen(NEWLINE);
-    
+    for (int i = 0; i < E.fileRows; i++) {
+        totalSize += E.row[i].size;
+        if (i < E.fileRows - 1)
+            totalSize += strlen(NEWLINE);
+    }
+
     if (bufLength) *bufLength = totalSize;
 
     char *buffer = static_cast<char*>(malloc(totalSize));
@@ -96,9 +89,10 @@ char *rowsToString(size_t *bufLength) {     //When using this function, make sur
     for (int i = 0; i < E.fileRows; i++) {
         memcpy(ptr, E.row[i].chars, E.row[i].size);
         ptr += E.row[i].size;
-
-        memcpy(ptr, NEWLINE, strlen(NEWLINE));
-        ptr += strlen(NEWLINE);
+        if (i < E.fileRows - 1) { 
+            *ptr = '\n';
+            ptr++;
+        }
     }
     
     return buffer;

@@ -12,6 +12,8 @@ enum editorKey {
     ARROW_RIGHT,
     ARROW_UP,
     ARROW_DOWN,
+    CTRL_ARROW_LEFT,
+    CTRL_ARROW_RIGHT,
     SCREEN_BOTTOM,
     SCREEN_TOP,
     SCREEN_MIDDLE,

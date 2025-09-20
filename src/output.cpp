@@ -134,9 +134,12 @@ void editorScroll() {
     if (E.rowOffset < 0)                                                // Ensure rowOffset doesn't go negative
         E.rowOffset = 0;
 
-    if (E.fileRows > 0 && E.rowOffset > E.fileRows - E.screenRows)      // Ensure rowOffset doesn't go beyond file content
+    if (E.fileRows > 0 && E.rowOffset > E.fileRows - E.screenRows){     // Ensure rowOffset doesn't go beyond file content
         E.rowOffset = E.fileRows - E.screenRows;
-    
+        if (E.rowOffset < 0)                                             
+        E.rowOffset = 0;
+    }
+
     if (E.cursorY < E.rowOffset)                                        // Handle vertical scrolling
         E.rowOffset = E.cursorY;
 }

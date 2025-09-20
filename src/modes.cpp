@@ -21,8 +21,7 @@ void defaultMode()
                     return;
                 }
                 DWORD written;
-                const char* output = "\x1b[2J\x1b[H";
-                if (!WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), output, (DWORD)strlen(output), &written, NULL)) 
+                if (!WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), REFRESH, (DWORD)strlen(REFRESH), &written, NULL)) 
                     die("editorRefreshScreen_WriteConsoleA");
                 exit(EXIT_SUCCESS);
                 break;
@@ -73,8 +72,7 @@ void insertMode()
                     return;
                 }
                 DWORD written;
-                const char* output = "\x1b[2J\x1b[H";
-                if (!WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), output, (DWORD)strlen(output), &written, NULL)) 
+                if (!WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), REFRESH, (DWORD)strlen(REFRESH), &written, NULL)) 
                     die("editorRefreshScreen_WriteConsoleA");
                 exit(EXIT_SUCCESS);
                 break;
@@ -84,6 +82,14 @@ void insertMode()
             case ARROW_RIGHT:
             case ARROW_UP:
                 moveCursor(c);
+                break;
+            case CTRL_ARROW_LEFT:
+            case CTRL_ARROW_RIGHT:
+                while(E.cursorX > 0 && E.cursorX < E.screenCols && E.cursorY < E.fileRows) {
+                    moveCursor(c == CTRL_ARROW_LEFT ? ARROW_LEFT : ARROW_RIGHT);
+                    if (E.cursorX > 0 && E.cursorX < E.screenCols && E.cursorY < E.fileRows) 
+                        if (E.row[E.cursorY].chars[E.cursorX - 1] == ' ') break;
+                }
                 break;
             case SCREEN_BOTTOM:
             case SCREEN_TOP:
@@ -120,4 +126,9 @@ void insertMode()
         }
         
     quitTimes = QUIT_TIMES;
+}
+
+void searchMode()
+{
+
 }
