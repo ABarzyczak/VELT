@@ -18,7 +18,8 @@ enum editorKey {
     SCREEN_TOP,
     SCREEN_MIDDLE,
     DELETE_KEY,
-    INSERTION
+    ENTER_KEY,
+    INSERTION           // Insert mode
 };
 
 int readKey();
@@ -26,4 +27,6 @@ void processKeypress();
 void moveCursor(int key);
 int cursorX_To_renderX(editorRow *row, int cX);
 void insertChar(int c);
+void rowAppendString(editorRow *row, char *s, size_t len);
 void deleteChar();
+void deleteRow(int at);

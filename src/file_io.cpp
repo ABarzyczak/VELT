@@ -85,5 +85,5 @@ void editorSave() {
     
     E.dirty = 0;
     free(buffer);
-    setStatusMessage("%d bytes written to disk", bufLength);
+    setStatusMessage("data saved", bufLength);
 }

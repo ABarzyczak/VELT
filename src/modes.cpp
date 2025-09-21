@@ -106,18 +106,21 @@ void insertMode()
                     moveCursor(ARROW_DOWN);
                 break;
             }
-            case CTRL_KEY('s'):
-                editorSave();
-                break;
             case ESC:
                 E.mode = DEFAULT_MODE;
                 setStatusMessage("");
+                break;
+            case CTRL_KEY('s'):
+                editorSave();
                 break;
             case BACKSPACE:
             case DELETE_KEY:
             case CTRL_KEY('h'):
                 if (c == DELETE_KEY) moveCursor(ARROW_RIGHT);
                 deleteChar();
+                break;
+            case ENTER_KEY:
+                
                 break;
             default:
                 if (c >= MIN_ASCII_PRINTABLE_CHAR && c <= MAX_ASCII_PRINTABLE_CHAR)

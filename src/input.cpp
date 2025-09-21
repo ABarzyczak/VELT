@@ -59,6 +59,8 @@ int readKey() {
                 case VK_DELETE: return DELETE_KEY;
                 case VK_BACK: return BACKSPACE;
 
+                case VK_RETURN: return ENTER_KEY;
+
                 default:
                     if(E.mode == DEFAULT_MODE && asciiChar >= MIN_ASCII_PRINTABLE_CHAR && asciiChar <= MAX_ASCII_PRINTABLE_CHAR) {
                         switch (asciiChar) {
@@ -161,9 +163,24 @@ void insertChar(int c)
     E.cursorX++;
 }
 
+void rowAppendString(editorRow *row, char *s, size_t len)
+{
+    row->chars = static_cast<char*>(realloc(row->chars, row->size + len + 1));
+    if (!row->chars) {
+        die("rowAppendString realloc failed");
+        return;
+    }
+    memcpy(&row->chars[row->size], s, len);
+    row->size += len;
+    row->chars[row->size] = '\0';
+    rowUpdate(row);
+    E.dirty++;
+}
+
 void deleteChar()
 {
     if (E.cursorY == E.fileRows) return;
+    if (E.cursorX == 0 && E.cursorY == 0) return;
 
     editorRow * row = &E.row[E.cursorY];
     int at = E.cursorX - 1;
@@ -176,4 +193,24 @@ void deleteChar()
         E.dirty++;
         E.cursorX--;
     }
+    else {
+        E.cursorX = E.row[E.cursorY - 1].size;
+        rowAppendString(&E.row[E.cursorY - 1], row->chars, row->size);
+        deleteRow(E.cursorY);
+        E.cursorY--;
+    }
+}
+
+void deleteRow(int at)
+{
+    if (at < 0 || at >= E.fileRows) return;
+
+    free(E.row[at].render);
+    free(E.row[at].chars);
+    memmove(&E.row[at], &E.row[at + 1], sizeof(editorRow) * (E.fileRows - at - 1));
+    E.fileRows--;
+    E.dirty++;
+    E.cursorX = 0;
+    if (E.cursorY > E.fileRows) 
+        E.cursorY = E.fileRows;
 }
