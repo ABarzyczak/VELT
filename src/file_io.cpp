@@ -40,14 +40,14 @@ void editorOpen(char *filename) {
 
     while (std::getline(file, line)) {
         lineLength = line.length();
-        rowAppend(line.c_str(), lineLength);
+        rowInsert(E.fileRows, line.c_str(), lineLength);
     }
 
     E.fileRows = lineCount;
     file.close();
 
     if (E.fileRows == 0) {
-        rowAppend("", 0);
+        rowInsert(E.fileRows, "", 0);
     }
 
     E.dirty = 0;

@@ -35,20 +35,20 @@ void rowUpdate(editorRow *row) {
     row->renderSize = idx;
 }
 
-void rowAppend(std::string s, size_t len) {
+void rowInsert(int currentRow, std::string s, size_t len) {
     E.row = static_cast<editorRow*>(realloc(E.row, sizeof(editorRow) * (E.fileRows + 1)));
     if (!E.row) {
-        die("rowAppend realloc failed");
+        die("rowInsert realloc failed");
         return;
     }
     
-    int currentRow = E.fileRows;
-    
+    memmove(&E.row[currentRow + 1], &E.row[currentRow], sizeof(editorRow) * (E.fileRows - currentRow));
+
     E.row[currentRow].size = len;
     E.row[currentRow].renderSize = 0;
     E.row[currentRow].chars = static_cast<char*>(malloc(len + SPACE_FOR_NULL_BYTE));
     if (!E.row[currentRow].chars) {
-        die("rowAppend malloc failed");
+        die("rowInsert malloc failed");
         return;
     }
     if (len > 0) 
@@ -57,7 +57,7 @@ void rowAppend(std::string s, size_t len) {
 
     E.row[currentRow].render = static_cast<char*>(malloc(SPACE_FOR_NULL_BYTE));
     if (!E.row[currentRow].render) {
-        die("rowAppend render malloc failed");
+        die("rowInsert render malloc failed");
         return;
     }
     E.row[currentRow].render[0] = NULL_TERMINATOR;

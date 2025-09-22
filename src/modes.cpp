@@ -120,7 +120,7 @@ void insertMode()
                 deleteChar();
                 break;
             case ENTER_KEY:
-                
+                insertNewline();
                 break;
             default:
                 if (c >= MIN_ASCII_PRINTABLE_CHAR && c <= MAX_ASCII_PRINTABLE_CHAR)

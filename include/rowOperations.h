@@ -6,5 +6,5 @@
  **/
 
 void rowUpdate(editorRow *row);
-void rowAppend(std::string s, size_t len);
+void rowInsert(int currentRow, std::string s, size_t len);
 char *rowsToString(size_t *bufLength);

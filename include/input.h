@@ -27,6 +27,7 @@ void processKeypress();
 void moveCursor(int key);
 int cursorX_To_renderX(editorRow *row, int cX);
 void insertChar(int c);
+void insertNewline();
 void rowAppendString(editorRow *row, char *s, size_t len);
 void deleteChar();
 void deleteRow(int at);

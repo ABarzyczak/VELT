@@ -142,7 +142,7 @@ int cursorX_To_renderX(editorRow *row, int cX) {
 void insertChar(int c)
 {
     if(E.cursorY == E.fileRows)
-        rowAppend(std::string(""), 0);
+        rowInsert(E.fileRows, std::string(""), 0);
 
     editorRow *row = &E.row[E.cursorY];
     int at = E.cursorX;
@@ -150,7 +150,7 @@ void insertChar(int c)
     if (at < 0 || at > row->size) return;
     row->chars = static_cast<char*>(realloc(row->chars, row->size + NEW_CHAR_AND_NULL_BYTE));
     if (!row->chars) {
-        die("rowInsertChar realloc failed");
+        die("insertChar realloc failed");
         return;
     }
     memmove(&row->chars[at + 1], &row->chars[at], row->size - at + 1);
@@ -161,6 +161,22 @@ void insertChar(int c)
     rowUpdate(row);
     E.dirty++;
     E.cursorX++;
+}
+
+void insertNewline()
+{
+    if(E.cursorX == 0) {
+        rowInsert(E.cursorY, std::string(""), 0);
+    } else {
+        editorRow *row = &E.row[E.cursorY];
+        rowInsert(E.cursorY + 1, &row->chars[E.cursorX], row->size - E.cursorX);
+        row = &E.row[E.cursorY];
+        row->size = E.cursorX;
+        row->chars[row->size] = '\0';
+        rowUpdate(row);
+    }
+    E.cursorY++;
+    E.cursorX = 0;
 }
 
 void rowAppendString(editorRow *row, char *s, size_t len)
@@ -194,10 +210,11 @@ void deleteChar()
         E.cursorX--;
     }
     else {
-        E.cursorX = E.row[E.cursorY - 1].size;
+        int insertionPoint = E.row[E.cursorY - 1].size;
         rowAppendString(&E.row[E.cursorY - 1], row->chars, row->size);
         deleteRow(E.cursorY);
         E.cursorY--;
+        E.cursorX = insertionPoint;
     }
 }
 
