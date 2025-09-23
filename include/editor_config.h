@@ -15,7 +15,8 @@ typedef struct{
 
 enum editorMode {
 	DEFAULT_MODE,
-	INSERT_MODE
+	INSERT_MODE,
+    PROMPT_MODE
 };
 
 struct editorConfig {

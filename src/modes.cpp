@@ -135,3 +135,54 @@ void searchMode()
 {
 
 }
+
+char *promptMode(char *prompt)
+{
+    E.mode = PROMPT_MODE;
+
+    size_t bufSize = PROMPT_BUF_SIZE;
+    char *buf = static_cast<char *>(malloc(bufSize));
+
+    size_t bufLen = 0;
+    buf[0] = NULL_TERMINATOR;
+
+    while(1)
+    {
+        setStatusMessage(prompt, buf);
+        refreshScreen();
+
+        int c = readKey();
+
+        if(c == ENTER_KEY)
+        {
+            if(bufLen != 0)
+            {
+                setStatusMessage("");
+                E.mode = DEFAULT_MODE;
+                return buf;
+            }
+        }
+        else if(c == ESC)
+        {
+            setStatusMessage("");
+            free(buf);
+            return NULL;
+        }
+        else if(c == BACKSPACE || c == CTRL_KEY('h') || c == DELETE_KEY)
+        {
+            if(bufLen != 0)
+                buf[--bufLen] = NULL_TERMINATOR;
+        }
+        else if(!iscntrl(c) && c < MAX_ASCII_PRINTABLE_CHAR)
+        {
+            if(bufLen == bufSize - 1)   //If bufSize isn't enough
+            {
+                bufSize *= 2;   
+                buf = static_cast<char *>(realloc(buf, bufSize));
+
+            }
+            buf[bufLen++] = c;
+            buf[bufLen] = '\0';
+        }
+    }
+}

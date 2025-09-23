@@ -6,3 +6,4 @@
 void defaultMode();
 void insertMode();
 void searchMode();
+char *promptMode(char *modes);

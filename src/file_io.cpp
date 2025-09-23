@@ -5,6 +5,7 @@
 #include "../include/constants.h"
 #include "../include/rowOperations.h"
 #include "../include/output.h"
+#include "../include/modes.h"
 #include <cstring>
 #include <cstdlib>
 #include <fstream>
@@ -54,9 +55,15 @@ void editorOpen(char *filename) {
 }
 
 void editorSave() {
-    if (E.fileName == nullptr) {
-        die("No file name specified");
-        return;
+    if(E.fileName == NULL)
+    {
+        E.fileName = promptMode(const_cast<char *>("Save as: %s (ESC to cancel)"));
+        if(E.fileName == NULL)
+        {
+            E.mode = DEFAULT_MODE;
+            setStatusMessage("Save aborted");
+            return;
+        }
     }
 
     size_t bufLength = 0;
